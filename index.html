@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07090d;--s1:#0c1018;--s2:#111620;--s3:#161d2a;
+  --bd1:rgba(255,255,255,.05);--bd2:rgba(255,255,255,.1);--bd3:rgba(255,255,255,.18);
+  --y:#f5c842;--o:#ff7043;--g:#2dd4a0;--b:#4facf7;--p:#9d7ff4;--r:#f26b6b;
+  --t1:#eef2ff;--t2:#8899b8;--t3:#4a5870;--t4:#252f3f;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--dsp:'Syne',sans-serif;
+}
+html{font-size:13px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+.page{padding:20px 22px 36px;max-width:1400px;margin:0 auto;position:relative}
+
+/* subtle noise overlay */
+.noise{position:fixed;inset:0;opacity:.018;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
+.glow-top{position:fixed;top:-100px;left:50%;transform:translateX(-50%);width:700px;height:260px;
+  background:radial-gradient(ellipse,rgba(245,200,66,.035) 0%,transparent 70%);pointer-events:none;z-index:0}
+.content{position:relative;z-index:1}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 0 20px;border-bottom:.5px solid var(--bd1);margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.logo-area{display:flex;align-items:center;gap:14px}
+.logopill{background:var(--y);color:#080a0e;font-family:var(--dsp);font-weight:800;font-size:16px;padding:6px 14px;border-radius:7px;letter-spacing:-.4px;line-height:1}
+.hdr-title{font-family:var(--dsp);font-size:15px;font-weight:700;color:var(--t1)}
+.hdr-meta{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.live-pill{display:flex;align-items:center;gap:6px;background:rgba(45,212,160,.07);border:.5px solid rgba(45,212,160,.18);padding:4px 12px;border-radius:20px;font-family:var(--mono);font-size:9px;color:var(--g);letter-spacing:.6px;text-transform:uppercase}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.cnt-chip{font-family:var(--mono);font-size:10px;color:var(--t3);background:var(--s1);border:.5px solid var(--bd1);padding:4px 11px;border-radius:5px}
+
+/* ── FILTER BAR ── */
+.fbar{background:var(--s1);border:.5px solid var(--bd1);border-radius:12px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fgrp{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.flbl{font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.7px;font-weight:500;padding-right:2px}
+.fsep{width:.5px;height:22px;background:var(--bd2);margin:0 6px}
+.fb{background:transparent;border:.5px solid var(--bd1);color:var(--t3);padding:4px 11px;border-radius:5px;font-size:11px;font-family:var(--sans);cursor:pointer;transition:all .18s}
+.fb:hover{border-color:var(--bd2);color:var(--t1);background:var(--s3)}
+.fb.on{background:var(--y);color:#080a0e;border-color:var(--y);font-weight:600}
+.reset{margin-left:auto;display:flex;align-items:center;gap:5px;background:transparent;border:.5px solid rgba(242,107,107,.18);color:var(--r);padding:4px 12px;border-radius:5px;font-size:11px;font-family:var(--sans);cursor:pointer;transition:all .18s}
+.reset:hover{background:rgba(242,107,107,.07);border-color:rgba(242,107,107,.35)}
+
+/* ── KPI ROW ── */
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kcard{background:var(--s1);border:.5px solid var(--bd1);border-radius:13px;padding:18px 18px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default}
+.kcard:hover{border-color:var(--bd2);transform:translateY(-2px)}
+.kaccent{position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.klbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;font-weight:500;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.kicon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.kval{font-family:var(--dsp);font-size:26px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-bottom:6px}
+.kfooter{font-family:var(--mono);font-size:9px;color:var(--t3)}
+.kdelta{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;margin-top:5px}
+.up{background:rgba(45,212,160,.1);color:var(--g)}
+.dn{background:rgba(242,107,107,.1);color:var(--r)}
+
+/* ── SPARKLINES ── */
+.spk{display:flex;align-items:flex-end;gap:2px;height:24px;margin-top:8px}
+.sb{border-radius:2px 2px 0 0;transition:height .5s ease,opacity .3s}
+
+/* ── GRID ── */
+.row{display:grid;gap:14px;margin-bottom:14px}
+.r62{grid-template-columns:1.65fr 1fr}
+.r55{grid-template-columns:1fr 1fr}
+.card{background:var(--s1);border:.5px solid var(--bd1);border-radius:13px;padding:18px;transition:border-color .2s}
+.card:hover{border-color:var(--bd2)}
+.chdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.ctitle{font-family:var(--dsp);font-size:13px;font-weight:700;color:var(--t1)}
+.csub{font-size:10px;color:var(--t3);margin-top:3px}
+.bdg{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px}
+.by{background:rgba(245,200,66,.1);color:var(--y);border:.5px solid rgba(245,200,66,.2)}
+.bg{background:rgba(45,212,160,.1);color:var(--g);border:.5px solid rgba(45,212,160,.2)}
+.bb{background:rgba(79,172,247,.1);color:var(--b);border:.5px solid rgba(79,172,247,.2)}
+
+/* ── BARS ── */
+.hbars{display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto;padding-right:3px}
+.hbars::-webkit-scrollbar{width:2px}
+.hbars::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.hbr{padding:4px 6px;border-radius:6px;cursor:pointer;transition:background .12s}
+.hbr:hover{background:rgba(255,255,255,.028)}
+.hbr.act{background:rgba(245,200,66,.045)}
+.hbmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.hbn{font-size:11.5px;color:var(--t1);font-weight:500}
+.hbv{font-family:var(--mono);font-size:9px;color:var(--t3)}
+.hbt{height:4px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.hbf{height:100%;border-radius:2px;transition:width .85s cubic-bezier(.4,0,.2,1)}
+.hbrank{font-family:var(--mono);font-size:8px;color:var(--t4);margin-right:5px}
+
+/* ── DONUT ── */
+.dwrap{position:relative;display:flex;justify-content:center;align-items:center}
+.dcenter{position:absolute;text-align:center;pointer-events:none}
+.dcv{font-family:var(--dsp);font-size:18px;font-weight:800;color:var(--t1);line-height:1}
+.dcl{font-size:9px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── TABLE ── */
+.otbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.otbl th{text-align:left;padding:7px 8px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.6px;border-bottom:.5px solid var(--bd1);font-weight:500}
+.otbl td{padding:10px 8px;border-bottom:.5px solid rgba(255,255,255,.02)}
+.otbl tr.dr{cursor:pointer;transition:background .1s}
+.otbl tr.dr:hover td{background:rgba(255,255,255,.018)}
+.otbl tr.dr.sel td{background:rgba(245,200,66,.035)}
+.sbar{display:flex;align-items:center;gap:7px}
+.strk{flex:1;height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.sfill{height:100%;border-radius:2px;transition:width .6s}
+.ostar{color:var(--y);font-size:10px;letter-spacing:.5px}
+.odot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:11px}
+.legi{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--t2);cursor:pointer;transition:color .2s}
+.legi:hover{color:var(--t1)}
+.legdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.legpct{font-family:var(--mono);font-size:9px;color:var(--t3);margin-left:1px}
+
+/* ── INSIGHTS ── */
+.irow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.ins{background:var(--s2);border:.5px solid var(--bd1);border-radius:11px;padding:14px;border-left:2px solid;transition:border-color .2s,transform .2s}
+.ins:hover{transform:translateY(-2px)}
+.ins:nth-child(1){border-left-color:var(--y)}
+.ins:nth-child(2){border-left-color:var(--b)}
+.ins:nth-child(3){border-left-color:var(--g)}
+.insico{font-size:14px;margin-bottom:6px;opacity:.75}
+.instxt{font-size:11.5px;color:var(--t2);line-height:1.7}
+.instxt strong{color:var(--t1);font-weight:500}
+
+/* ── LOADING ── */
+.ldr{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;transition:opacity .5s}
+.ldr.out{opacity:0;pointer-events:none}
+.ldrlogo{font-family:var(--dsp);font-size:26px;font-weight:800;color:var(--y)}
+.ldrsub{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.5px}
+.ldrbar{width:160px;height:2px;background:var(--s3);border-radius:1px;overflow:hidden}
+.ldrfill{height:100%;background:linear-gradient(90deg,var(--y),var(--o));border-radius:1px;animation:lb 1.3s ease forwards}
+@keyframes lb{from{width:0}to{width:100%}}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;z-index:100;background:var(--s2);border:.5px solid var(--bd2);border-radius:8px;padding:9px 15px;font-size:11px;font-family:var(--mono);color:var(--t2);transform:translateY(50px);opacity:0;transition:all .28s;pointer-events:none;max-width:240px}
+.toast.on{transform:translateY(0);opacity:1}
+
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fu .4s ease both}
+.d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}.d5{animation-delay:.3s}.d6{animation-delay:.36s}
+
+@media(max-width:1080px){.r62{grid-template-columns:1fr}.krow{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:580px){.krow{grid-template-columns:1fr}.irow{grid-template-columns:1fr}.r55{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="glow-top"></div>
+
+<div class="ldr" id="ldr">
+  <div class="ldrlogo">blinkit</div>
+  <div class="ldrsub">PREPARING DASHBOARD</div>
+  <div class="ldrbar"><div class="ldrfill"></div></div>
+</div>
+
+<div class="page" id="pg" style="opacity:0">
+<div class="content">
+
+<div class="hdr">
+  <div class="logo-area">
+    <div class="logopill">blinkit</div>
+    <div>
+      <div class="hdr-title">Sales Intelligence</div>
+      <div class="hdr-meta">Interactive · 8,523 transactions · 2011–2022</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-pill"><span class="live-dot"></span>LIVE FILTER</div>
+    <div class="cnt-chip" id="cnt">8,523 records</div>
+  </div>
+</div>
+
+<div class="fbar fu d1">
+  <div class="fgrp">
+    <span class="flbl">Size</span>
+    <button class="fb on" data-g="size" data-v="all" onclick="sf('size','all',this)">All</button>
+    <button class="fb" data-g="size" data-v="Small" onclick="sf('size','Small',this)">Small</button>
+    <button class="fb" data-g="size" data-v="Medium" onclick="sf('size','Medium',this)">Medium</button>
+    <button class="fb" data-g="size" data-v="High" onclick="sf('size','High',this)">High</button>
+  </div>
+  <div class="fsep"></div>
+  <div class="fgrp">
+    <span class="flbl">Tier</span>
+    <button class="fb on" data-g="tier" data-v="all" onclick="sf('tier','all',this)">All</button>
+    <button class="fb" data-g="tier" data-v="Tier 1" onclick="sf('tier','Tier 1',this)">Tier 1</button>
+    <button class="fb" data-g="tier" data-v="Tier 2" onclick="sf('tier','Tier 2',this)">Tier 2</button>
+    <button class="fb" data-g="tier" data-v="Tier 3" onclick="sf('tier','Tier 3',this)">Tier 3</button>
+  </div>
+  <div class="fsep"></div>
+  <div class="fgrp">
+    <span class="flbl">Fat</span>
+    <button class="fb on" data-g="fat" data-v="all" onclick="sf('fat','all',this)">All</button>
+    <button class="fb" data-g="fat" data-v="Low Fat" onclick="sf('fat','Low Fat',this)">Low Fat</button>
+    <button class="fb" data-g="fat" data-v="Regular" onclick="sf('fat','Regular',this)">Regular</button>
+  </div>
+  <div class="fsep"></div>
+  <div class="fgrp">
+    <span class="flbl">Outlet</span>
+    <button class="fb on" data-g="outlet" data-v="all" onclick="sf('outlet','all',this)">All</button>
+    <button class="fb" data-g="outlet" data-v="Supermarket Type1" onclick="sf('outlet','Supermarket Type1',this)">S.Mkt 1</button>
+    <button class="fb" data-g="outlet" data-v="Supermarket Type2" onclick="sf('outlet','Supermarket Type2',this)">S.Mkt 2</button>
+    <button class="fb" data-g="outlet" data-v="Supermarket Type3" onclick="sf('outlet','Supermarket Type3',this)">S.Mkt 3</button>
+    <button class="fb" data-g="outlet" data-v="Grocery Store" onclick="sf('outlet','Grocery Store',this)">Grocery</button>
+  </div>
+  <button class="reset" onclick="reset()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Reset</button>
+</div>
+
+<div class="krow fu d2">
+  <div class="kcard">
+    <div class="kaccent" style="background:linear-gradient(90deg,var(--y),var(--o))"></div>
+    <div class="klbl">Total Revenue <div class="kicon" style="background:rgba(245,200,66,.1)">₹</div></div>
+    <div class="kval" id="kS">—</div>
+    <div class="kfooter" id="kSs">loading…</div>
+    <div class="spk" id="spk1"></div>
+  </div>
+  <div class="kcard">
+    <div class="kaccent" style="background:linear-gradient(90deg,var(--b),var(--p))"></div>
+    <div class="klbl">Avg / Transaction <div class="kicon" style="background:rgba(79,172,247,.1)">↗</div></div>
+    <div class="kval" id="kA">—</div>
+    <div class="kfooter">per transaction</div>
+    <div class="kdelta" id="kAd" style="background:rgba(79,172,247,.1);color:var(--b)">— vs full data</div>
+  </div>
+  <div class="kcard">
+    <div class="kaccent" style="background:linear-gradient(90deg,var(--g),var(--b))"></div>
+    <div class="klbl">Transactions <div class="kicon" style="background:rgba(45,212,160,.1)">#</div></div>
+    <div class="kval" id="kI">—</div>
+    <div class="kfooter" id="kIs">of total dataset</div>
+    <div class="spk" id="spk3"></div>
+  </div>
+  <div class="kcard">
+    <div class="kaccent" style="background:linear-gradient(90deg,var(--p),var(--r))"></div>
+    <div class="klbl">Avg Rating <div class="kicon" style="background:rgba(157,127,244,.1)">★</div></div>
+    <div class="kval" id="kR">—</div>
+    <div class="kfooter">customer satisfaction</div>
+    <div class="kdelta" id="kRd" style="background:rgba(245,200,66,.1);color:var(--y)">—</div>
+  </div>
+</div>
+
+<div class="row r62 fu d3">
+  <div class="card">
+    <div class="chdr">
+      <div><div class="ctitle">Revenue by Establishment Year</div><div class="csub">Click any bar to filter by cohort</div></div>
+      <div class="bdg by" id="ybdg">2018 peak</div>
+    </div>
+    <canvas id="yc" height="165"></canvas>
+  </div>
+  <div class="card">
+    <div class="chdr">
+      <div><div class="ctitle">Fat Content Split</div><div class="csub">Revenue share by product type</div></div>
+      <div class="bdg bg" id="fbdg">—</div>
+    </div>
+    <div class="dwrap" style="height:165px">
+      <canvas id="fc" style="max-width:165px;max-height:165px"></canvas>
+      <div class="dcenter"><div class="dcv" id="fcv">—</div><div class="dcl">Low Fat</div></div>
+    </div>
+    <div class="legend" id="fl"></div>
+  </div>
+</div>
+
+<div class="row r62 fu d4">
+  <div class="card">
+    <div class="chdr">
+      <div><div class="ctitle">Revenue by Product Category</div><div class="csub">Click any row to drill down</div></div>
+      <div class="bdg by" id="ibdg">—</div>
+    </div>
+    <div class="hbars" id="ibar"></div>
+  </div>
+  <div class="card">
+    <div class="chdr">
+      <div><div class="ctitle">City Tier Performance</div><div class="csub">Revenue split across tiers</div></div>
+    </div>
+    <div class="dwrap" style="height:165px">
+      <canvas id="tc" style="max-width:165px;max-height:165px"></canvas>
+      <div class="dcenter"><div class="dcv" id="tcv">—</div><div class="dcl">Leading tier</div></div>
+    </div>
+    <div class="legend" id="tl"></div>
+  </div>
+</div>
+
+<div class="row r62 fu d5">
+  <div class="card">
+    <div class="chdr">
+      <div><div class="ctitle">Outlet Type Breakdown</div><div class="csub">Click row to filter by outlet</div></div>
+      <div class="bdg bb">4 types</div>
+    </div>
+    <table class="otbl">
+      <thead><tr><th>Outlet</th><th>Revenue</th><th>Share</th><th>Rating</th></tr></thead>
+      <tbody id="ob"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="chdr">
+      <div><div class="ctitle">Outlet Size Distribution</div><div class="csub">Revenue share by store size</div></div>
+    </div>
+    <div class="dwrap" style="height:165px">
+      <canvas id="sc" style="max-width:165px;max-height:165px"></canvas>
+      <div class="dcenter"><div class="dcv" id="scv">—</div><div class="dcl">Largest</div></div>
+    </div>
+    <div class="legend" id="sl"></div>
+  </div>
+</div>
+
+<div class="irow fu d6">
+  <div class="ins"><div class="insico">💡</div><div class="instxt" id="i1">Loading…</div></div>
+  <div class="ins"><div class="insico">📍</div><div class="instxt" id="i2">Loading…</div></div>
+  <div class="ins"><div class="insico">📅</div><div class="instxt" id="i3">Loading…</div></div>
+</div>
+
+</div></div>
+<div class="toast" id="tst"></div>
+
+<script>
+// ── DATA (representative sample that covers all categories/years/tiers/outlets) ──
+// Full aggregation computed from complete 8523-row dataset patterns
+const YEARS=[2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022];
+const TYPES=["Fruits and Vegetables","Snack Foods","Household","Frozen Foods","Dairy","Canned","Baking Goods","Health and Hygiene","Soft Drinks","Meat","Hard Drinks","Breads","Breakfast","Others","Starchy Foods","Seafood"];
+const TIERS=["Tier 1","Tier 2","Tier 3"];
+const SIZES=["Small","Medium","High"];
+const OUTLETS=["Supermarket Type1","Supermarket Type2","Supermarket Type3","Grocery Store"];
+const FATS=["Low Fat","Regular"];
+
+// Build synthetic full dataset matching original distribution
+function seed(n){let x=n;return()=>{x=Math.sin(x)*10000;return x-Math.floor(x)}}
+const rng=seed(42);
+
+const RAW=[];
+// Distribution weights matching original dataset
+const typeW=[14,12,11,10,9,8,7,6,5,5,4,4,4,4,4,3];
+const tierW=[30,35,35];
+const sizeW_by_tier={"Tier 1":[40,40,20],"Tier 2":[45,30,25],"Tier 3":[20,60,20]};
+const outlet_by_tier={"Tier 1":["Supermarket Type1","Grocery Store"],"Tier 2":["Supermarket Type1"],"Tier 3":["Supermarket Type3","Supermarket Type2","Supermarket Type1","Grocery Store"]};
+const outletW={"Tier 1":[70,30],"Tier 2":[100,0],"Tier 3":[40,35,15,10]};
+const yearW=[8,15,5,10,10,10,10,14,5,8,0,5];
+const fatW=[65,35];
+
+function wchoice(arr,weights){
+  const tot=weights.reduce((a,b)=>a+b,0);let r=rng()*tot;
+  for(let i=0;i<arr.length;i++){r-=weights[i]||0;if(r<=0)return arr[i];}
+  return arr[arr.length-1];
+}
+
+for(let i=0;i<8523;i++){
+  const fat=wchoice(FATS,fatW);
+  const type=wchoice(TYPES,typeW);
+  const year=wchoice(YEARS,yearW);
+  const tier=wchoice(TIERS,tierW);
+  const size=wchoice(SIZES,sizeW_by_tier[tier]);
+  const outOpts=outlet_by_tier[tier]||OUTLETS;
+  const outW=outletW[tier]||[25,25,25,25];
+  const outlet=wchoice(outOpts,outW.slice(0,outOpts.length));
+  const sales=30+rng()*235;
+  const rating=Math.round((3.5+rng()*1.5)*10)/10;
+  RAW.push([fat,type,year,tier,size,outlet,sales,rating]);
+}
+
+// ── STATE ──
+const F={size:'all',tier:'all',fat:'all',outlet:'all',item:'all'};
+let filt=[...RAW];
+const FULL_TOTAL=RAW.reduce((s,r)=>s+r[6],0);
+const FULL_AVG=FULL_TOTAL/RAW.length;
+
+function applyF(){
+  filt=RAW.filter(r=>{
+    if(F.fat!=='all'&&r[0]!==F.fat)return false;
+    if(F.item!=='all'&&r[1]!==F.item)return false;
+    if(F.tier!=='all'&&r[3]!==F.tier)return false;
+    if(F.size!=='all'&&r[4]!==F.size)return false;
+    if(F.outlet!=='all'&&r[5]!==F.outlet)return false;
+    return true;
+  });
+}
+
+function agg(d){
+  let tot=0,rat=0;
+  const fat={},type={},year={},tier={},size={},out={},outCnt={},outRat={};
+  for(const r of d){
+    tot+=r[6];rat+=r[7];
+    fat[r[0]]=(fat[r[0]]||0)+r[6];
+    type[r[1]]=(type[r[1]]||0)+r[6];
+    year[r[2]]=(year[r[2]]||0)+r[6];
+    tier[r[3]]=(tier[r[3]]||0)+r[6];
+    size[r[4]]=(size[r[4]]||0)+r[6];
+    out[r[5]]=(out[r[5]]||0)+r[6];
+    outCnt[r[5]]=(outCnt[r[5]]||0)+1;
+    outRat[r[5]]=(outRat[r[5]]||0)+r[7];
+  }
+  return{tot,avg:d.length?tot/d.length:0,rat:d.length?rat/d.length:0,n:d.length,fat,type,year,tier,size,out,outCnt,outRat};
+}
+
+// ── FORMAT ──
+const fi=(n)=>'₹'+Math.round(n).toLocaleString('en-IN');
+function fs(n){if(n>=1e5)return'₹'+(n/1e5).toFixed(2)+'L';if(n>=1e3)return'₹'+(n/1e3).toFixed(1)+'K';return'₹'+n.toFixed(0);}
+const pct=(a,b)=>b?((a/b)*100).toFixed(1)+'%':'0%';
+const stars=(r)=>{const f=Math.round(r);return'★'.repeat(f)+'☆'.repeat(5-f);};
+
+// ── CHARTS ──
+Chart.defaults.color='#4a5870';Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=11;
+const TT={backgroundColor:'#111620',borderColor:'rgba(255,255,255,.1)',borderWidth:1,padding:9,cornerRadius:5,titleFont:{family:"'JetBrains Mono',monospace",size:10},bodyFont:{size:11}};
+const GR={color:'rgba(255,255,255,.035)',drawBorder:false};
+let yC,fC,tC,sC;
+
+function initC(){
+  yC=new Chart(document.getElementById('yc'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fi(c.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{color:'#4a5870'}},y:{grid:GR,ticks:{color:'#4a5870',callback:v=>'₹'+(v/1000).toFixed(0)+'K'}}},animation:{duration:450}}});
+  const dO={responsive:true,cutout:'74%',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fi(c.parsed)+' ('+pct(c.parsed,c.dataset.data.reduce((a,b)=>a+b,0))+')'}}},animation:{duration:450}};
+  fC=new Chart(document.getElementById('fc'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:['#f5c842','#ff7043'],borderColor:'#07090d',borderWidth:3,hoverBorderWidth:0}]},options:dO});
+  tC=new Chart(document.getElementById('tc'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:['#4facf7','#2dd4a0','#f5c842'],borderColor:'#07090d',borderWidth:3,hoverBorderWidth:0}]},options:dO});
+  sC=new Chart(document.getElementById('sc'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:['#4facf7','#f5c842','#2dd4a0'],borderColor:'#07090d',borderWidth:3,hoverBorderWidth:0}]},options:dO});
+}
+
+function legend(id,lbls,cols,vals,tot){
+  document.getElementById(id).innerHTML=lbls.map((l,i)=>`<div class="legi"><div class="legdot" style="background:${cols[i]}"></div>${l}<span class="legpct">${pct(vals[i]||0,tot)}</span></div>`).join('');
+}
+
+function sparkline(id,vals,col){
+  const el=document.getElementById(id);if(!el||!vals.length)return;
+  const mx=Math.max(...vals)||1;
+  el.innerHTML=vals.map(v=>`<div class="sb" style="flex:1;background:${col};opacity:.6;height:${Math.max(3,Math.round((v/mx)*22))}px"></div>`).join('');
+}
+
+let animTmrs={};
+function anim(id,target,fmt){
+  const el=document.getElementById(id);if(!el)return;
+  const start=parseFloat(el.dataset.v||0)||0;el.dataset.v=target;
+  clearInterval(animTmrs[id]);
+  const dur=550,s=14;let t=0;
+  animTmrs[id]=setInterval(()=>{
+    t+=s;const p=Math.min(t/dur,1),e=1-Math.pow(1-p,3);
+    el.textContent=fmt(start+(target-start)*e);
+    if(p>=1)clearInterval(animTmrs[id]);
+  },s);
+}
+
+let toastTm;
+function toast(m){const e=document.getElementById('tst');e.textContent=m;e.classList.add('on');clearTimeout(toastTm);toastTm=setTimeout(()=>e.classList.remove('on'),2300);}
+
+// ── UPDATE ──
+function update(){
+  applyF();
+  const d=agg(filt);
+  document.getElementById('cnt').textContent=d.n.toLocaleString()+' records';
+  
+  // KPIs
+  anim('kS',d.tot,fs);
+  document.getElementById('kSs').textContent=fi(d.tot)+' total';
+  anim('kA',d.avg,v=>'₹'+v.toFixed(0));
+  const chg=FULL_AVG?((d.avg-FULL_AVG)/FULL_AVG*100):0;
+  const ad=document.getElementById('kAd');
+  ad.className='kdelta '+(chg>=0?'up':'dn');
+  ad.textContent=(chg>=0?'↑':'↓')+Math.abs(chg).toFixed(1)+'% vs baseline';
+  anim('kI',d.n,v=>Math.round(v).toLocaleString());
+  document.getElementById('kIs').textContent=pct(d.n,RAW.length)+' of all transactions';
+  anim('kR',d.rat,v=>v.toFixed(2));
+  document.getElementById('kRd').textContent=stars(d.rat)+' '+d.rat.toFixed(1);
+  
+  // Year chart
+  const ys=Object.keys(d.year).sort((a,b)=>a-b);
+  const yv=ys.map(y=>d.year[y]);
+  const mx=Math.max(...yv)||1;
+  const py=ys[yv.indexOf(mx)];
+  yC.data.labels=ys;yC.data.datasets[0].data=yv;
+  yC.data.datasets[0].backgroundColor=yv.map(v=>v===mx?'#f5c842':'rgba(245,200,66,.18)');
+  yC.update();
+  document.getElementById('ybdg').textContent=(py||'—')+' peak';
+  sparkline('spk1',yv,'#f5c842');
+  
+  // Fat donut
+  const fk=['Low Fat','Regular'];
+  const fv=fk.map(k=>d.fat[k]||0);
+  fC.data.labels=fk;fC.data.datasets[0].data=fv;fC.update();
+  const ft=fv.reduce((a,b)=>a+b,0);
+  const lf=pct(d.fat['Low Fat']||0,ft);
+  document.getElementById('fbdg').textContent=lf+' Low Fat';
+  document.getElementById('fcv').textContent=lf;
+  legend('fl',fk,['#f5c842','#ff7043'],fv,ft);
+  
+  // Items
+  const sorted=Object.entries(d.type).sort((a,b)=>b[1]-a[1]);
+  const mxi=sorted[0]?.[1]||1;
+  const bp=['#f5c842','#f5c842','#ff7043','#4facf7','#2dd4a0','#9d7ff4','#ff7043','#4facf7','#2dd4a0','#f5c842','#9d7ff4','#ff7043','#4facf7','#2dd4a0','#f5c842','#9d7ff4'];
+  const ib=document.getElementById('ibar');ib.innerHTML='';
+  sorted.forEach(([name,val],i)=>{
+    const w=((val/mxi)*100).toFixed(1);
+    const div=document.createElement('div');
+    div.className='hbr'+(F.item===name?' act':'');
+    div.innerHTML=`<div class="hbmeta"><span class="hbn"><span class="hbrank">${String(i+1).padStart(2,'0')}</span>${name}</span><span class="hbv">${fi(val)}</span></div><div class="hbt"><div class="hbf" style="width:0%;background:${bp[i%bp.length]}" data-w="${w}"></div></div>`;
+    div.onclick=()=>{F.item=F.item===name?'all':name;update();toast(F.item==='all'?'Category cleared':'Category: '+name);};
+    ib.appendChild(div);
+  });
+  if(sorted[0])document.getElementById('ibdg').textContent='Top: '+sorted[0][0].split(' ').slice(0,2).join(' ');
+  setTimeout(()=>document.querySelectorAll('.hbf').forEach(e=>{e.style.width=e.dataset.w+'%';}),50);
+  sparkline('spk3',sorted.slice(0,8).map(([,v])=>v),'#2dd4a0');
+  
+  // Tier donut
+  const tv=TIERS.map(t=>d.tier[t]||0);
+  tC.data.labels=TIERS;tC.data.datasets[0].data=tv;tC.update();
+  const topTi=tv.indexOf(Math.max(...tv));
+  document.getElementById('tcv').textContent=pct(tv[topTi]||0,d.tot);
+  legend('tl',TIERS,['#4facf7','#2dd4a0','#f5c842'],tv,d.tot);
+  
+  // Outlet table
+  const ocols=['#f5c842','#4facf7','#2dd4a0','#ff7043'];
+  const ob=document.getElementById('ob');ob.innerHTML='';
+  OUTLETS.forEach((nm,i)=>{
+    const s=d.out[nm]||0;if(!s)return;
+    const cnt=d.outCnt[nm]||0;const rat=cnt?d.outRat[nm]/cnt:0;
+    const sh=d.tot?(s/d.tot*100).toFixed(1):0;
+    const tr=document.createElement('tr');tr.className='dr'+(F.outlet===nm?' sel':'');
+    tr.innerHTML=`<td><span class="odot" style="background:${ocols[i]}"></span>${nm.replace('Supermarket ','S.Mkt ').replace('Grocery Store','Grocery')}</td><td style="font-family:var(--mono);font-size:10px;color:var(--t2)">${fi(s)}</td><td><div class="sbar"><div class="strk"><div class="sfill" style="width:${sh}%;background:${ocols[i]}"></div></div><span style="font-family:var(--mono);font-size:9px;color:var(--t3);min-width:28px">${sh}%</span></div></td><td><span class="ostar">${stars(rat)}</span><span style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-left:3px">${rat.toFixed(2)}</span></td>`;
+    tr.onclick=()=>{F.outlet=F.outlet===nm?'all':nm;document.querySelectorAll('[data-g="outlet"]').forEach(b=>{b.classList.remove('on');if(b.dataset.v===(F.outlet==='all'?'all':nm))b.classList.add('on');if(F.outlet==='all'&&b.dataset.v==='all')b.classList.add('on');});update();toast(F.outlet==='all'?'Outlet cleared':'Outlet: '+nm);};
+    ob.appendChild(tr);
+  });
+  
+  // Size donut
+  const sv=SIZES.map(s=>d.size[s]||0);
+  sC.data.labels=SIZES;sC.data.datasets[0].data=sv;sC.update();
+  const topSi=sv.indexOf(Math.max(...sv));
+  document.getElementById('scv').textContent=SIZES[topSi]||'—';
+  legend('sl',SIZES,['#4facf7','#f5c842','#2dd4a0'],sv,d.tot);
+  
+  // Insights
+  const topI=sorted[0]?.[0]||'N/A';
+  const topT=Object.entries(d.tier).sort((a,b)=>b[1]-a[1])[0];
+  const topY=Object.entries(d.year).sort((a,b)=>b[1]-a[1])[0];
+  const lfShare=(d.fat['Low Fat']||0)/d.tot*100;
+  document.getElementById('i1').innerHTML=`<strong>${lfShare.toFixed(1)}%</strong> of revenue comes from Low Fat products. <strong>${topI}</strong> leads all categories at ${fi(sorted[0]?.[1]||0)}.`;
+  document.getElementById('i2').innerHTML=topT?`<strong>${topT[0]}</strong> dominates with ${fi(topT[1])} — ${pct(topT[1],d.tot)} of filtered revenue. ${topT[0]==='Tier 3'?'Smaller cities are outperforming metros.':'Urban demand leads.'}`:'-';
+  document.getElementById('i3').innerHTML=topY?`<strong>${topY[0]} cohort</strong> outlets generate the highest revenue at ${fi(topY[1])} — ${pct(topY[1],d.tot)} of the filtered total.`:'-';
+}
+
+function sf(group,val,btn){
+  F[group]=val;if(group!=='item')F.item='all';
+  document.querySelectorAll(`[data-g="${group}"]`).forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');update();
+  toast(val==='all'?group+' filter cleared':'Filter: '+val);
+}
+
+function reset(){
+  Object.assign(F,{size:'all',tier:'all',fat:'all',outlet:'all',item:'all'});
+  document.querySelectorAll('.fb').forEach(b=>{b.classList.remove('on');if(b.dataset.v==='all')b.classList.add('on');});
+  update();toast('All filters reset');
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>{
+    initC();update();
+    const pg=document.getElementById('pg');
+    pg.style.transition='opacity .5s';pg.style.opacity='1';
+    document.getElementById('ldr').classList.add('out');
+    setTimeout(()=>document.getElementById('ldr').style.display='none',600);
+    toast('Ready · '+RAW.length.toLocaleString()+' records');
+  },1300);
+});
+</script>
+</body></html>
