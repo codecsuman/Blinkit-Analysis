@@ -4,6 +4,20 @@
 
 ---
 
+## 🚀 Live Project
+
+### 🔗 **View Live Dashboard**
+
+👉 https://blinkit-analysis-hazel.vercel.app/
+
+<p align="center">
+  <a href="https://blinkit-analysis-hazel.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀%20Live%20Dashboard-Open%20Now-brightgreen?style=for-the-badge&logo=vercel" />
+  </a>
+</p>
+
+---
+
 ## 📌 Project Overview
 
 This project performs a comprehensive analysis of Blinkit's grocery sales dataset using **Microsoft Excel**. The final deliverable is an interactive, slicer-driven dashboard that enables business stakeholders to explore KPIs, compare outlet performance, and understand product-level demand patterns.
@@ -12,137 +26,107 @@ This project performs a comprehensive analysis of Blinkit's grocery sales datase
 
 ## 🎯 Business Objective
 
-- Measure total and average sales performance across products and outlets
-- Understand how **fat content** (Low Fat vs Regular) impacts revenue
-- Evaluate outlet performance by **size**, **location tier**, and **type**
-- Track sales growth by **outlet establishment year**
-- Identify top-performing **item categories**
+* Measure total and average sales performance across products and outlets
+* Understand how **fat content** (Low Fat vs Regular) impacts revenue
+* Evaluate outlet performance by **size**, **location tier**, and **type**
+* Track sales growth by **outlet establishment year**
+* Identify top-performing **item categories**
 
 ---
 
 ## 📊 Key Performance Indicators (KPIs)
 
-| KPI | Value |
-|-----|-------|
-| 💰 Total Sales | ₹1,201,681 |
-| 📈 Average Sales per Item | ₹141.00 |
-| 📦 Total Items Sold | 8,523 |
+| KPI                       | Value      |
+| ------------------------- | ---------- |
+| 💰 Total Sales            | ₹1,201,681 |
+| 📈 Average Sales per Item | ₹141.00    |
+| 📦 Total Items Sold       | 8,523      |
 | ⭐ Average Customer Rating | 3.97 / 5.0 |
 
 ---
 
 ## 📉 Dashboard Insights
 
-### 1. 🥗 Total Sales by Fat Content
-| Fat Content | Sales |
-|-------------|-------|
-| Low Fat | ₹776,320 (64.6%) |
-| Regular | ₹425,362 (35.4%) |
+### 🥗 Total Sales by Fat Content
 
-**Insight:** Low-fat items contribute nearly 2× more revenue — health-conscious preferences are a dominant driver.
+| Fat Content | Sales            |
+| ----------- | ---------------- |
+| Low Fat     | ₹776,320 (64.6%) |
+| Regular     | ₹425,362 (35.4%) |
 
----
-
-### 2. 🛍️ Top Item Types by Sales
-| Rank | Item Type | Sales |
-|------|-----------|-------|
-| 1 | Fruits and Vegetables | ₹178,124 |
-| 2 | Snack Foods | ₹175,434 |
-| 3 | Household | ₹135,977 |
-| 4 | Frozen Foods | ₹118,559 |
-| 5 | Dairy | ₹101,276 |
-
-**Insight:** Perishables and snacks dominate — quick-commerce shoppers prioritize everyday essentials.
+**Insight:** Low-fat items contribute nearly 2× more revenue.
 
 ---
 
-### 3. 🏪 Sales by Outlet Size
-| Outlet Size | Sales |
-|-------------|-------|
-| Medium | ₹507,896 (42.3%) |
-| Small | ₹444,794 (37.0%) |
-| High | ₹248,992 (20.7%) |
+### 🛍️ Top Item Types by Sales
 
-**Insight:** Medium-sized outlets are the top revenue contributors, outperforming large outlets.
-
----
-
-### 4. 📍 Sales by Outlet Location (Tier)
-| Location Tier | Sales |
-|---------------|-------|
-| Tier 3 | ₹472,133 (39.3%) |
-| Tier 2 | ₹393,151 (32.7%) |
-| Tier 1 | ₹336,398 (28.0%) |
-
-**Insight:** Tier 3 cities are the strongest market — indicating high growth potential in smaller cities.
+| Rank | Item Type             | Sales    |
+| ---- | --------------------- | -------- |
+| 1    | Fruits and Vegetables | ₹178,124 |
+| 2    | Snack Foods           | ₹175,434 |
+| 3    | Household             | ₹135,977 |
+| 4    | Frozen Foods          | ₹118,559 |
+| 5    | Dairy                 | ₹101,276 |
 
 ---
 
-### 5. 🏬 Sales by Outlet Type
-| Outlet Type | Total Sales | Avg Rating |
-|-------------|-------------|------------|
-| Supermarket Type1 | ₹787,550 | 3.96 |
-| Grocery Store | ₹151,939 | 3.99 |
-| Supermarket Type2 | ₹131,478 | 3.97 |
-| Supermarket Type3 | ₹130,715 | 3.95 |
+### 🏪 Sales by Outlet Size
 
-**Insight:** Supermarket Type1 dominates with 65.5% of total sales. Grocery Stores have the highest average rating.
+* Medium: ₹507,896 (42.3%)
+* Small: ₹444,794 (37.0%)
+* High: ₹248,992 (20.7%)
 
 ---
 
-### 6. 📅 Sales by Outlet Establishment Year
-| Year | Sales |
-|------|-------|
-| 2018 | ₹204,522 |
-| 2017 | ₹133,104 |
-| 2016 | ₹132,113 |
-| 2014 | ₹131,809 |
-| 2022 | ₹131,478 |
+### 📍 Sales by Location Tier
 
-**Insight:** Outlets established in 2018 generate the highest revenue, suggesting they are most mature and high-traffic.
+* Tier 3: ₹472,133 (39.3%)
+* Tier 2: ₹393,151 (32.7%)
+* Tier 1: ₹336,398 (28.0%)
+
+---
+
+### 🏬 Sales by Outlet Type
+
+* Supermarket Type1: ₹787,550
+* Grocery Store: Highest rating (3.99)
+
+---
+
+### 📅 Sales by Establishment Year
+
+Top year: **2018 – ₹204,522**
 
 ---
 
 ## 📂 Dataset Description
 
-The dataset contains **8,523 records** with the following fields:
+Total Records: **8,523**
 
-| Column | Description |
-|--------|-------------|
-| Item Identifier | Unique product ID |
-| Item Type | Product category |
-| Item Fat Content | Low Fat / Regular |
-| Item Weight | Weight of the item |
-| Item Visibility | Shelf visibility score |
-| Outlet Identifier | Unique outlet ID |
-| Outlet Size | Small / Medium / High |
-| Outlet Location Type | Tier 1 / Tier 2 / Tier 3 |
-| Outlet Type | Supermarket Type 1/2/3 or Grocery Store |
-| Outlet Establishment Year | Year outlet was opened |
-| Sales | Revenue generated (₹) |
-| Rating | Customer satisfaction score (1–5) |
+Includes:
+
+* Product details
+* Outlet data
+* Sales & ratings
 
 ---
 
-## 🛠️ Tools & Techniques Used
+## 🛠️ Tools Used
 
-| Tool | Usage |
-|------|-------|
-| Microsoft Excel | Primary analysis and visualization platform |
-| Pivot Tables | Aggregating and slicing data |
-| Pivot Charts | Visual representation of KPIs |
-| Slicers | Interactive filters |
-| Dashboard Design | KPI cards and chart panels |
+* Microsoft Excel
+* Pivot Tables
+* Pivot Charts
+* Slicers
+* Dashboard Design
 
 ---
 
 ## 🚀 How to Use
 
-1. Download the `.xlsx` file from this repository
-2. Open in Microsoft Excel 2016 or later
-3. Go to the Dashboard sheet
-4. Use slicers to filter data
-5. Explore dynamic charts
+1. Download the `.xlsx` file
+2. Open in Excel (2016+)
+3. Go to Dashboard sheet
+4. Use slicers
 
 ---
 
@@ -158,28 +142,28 @@ blinkit-sales-analysis/
 
 ---
 
-## 💡 Key Business Insights Summary
+## 💡 Key Insights
 
-- Low-fat products dominate revenue (64.6%)
-- Medium outlets generate highest sales
-- Tier 3 cities are top-performing markets
-- Fruits & Vegetables and Snack Foods lead categories
-- Supermarket Type1 drives 65.5% revenue
-- 2018 outlets perform best
+* Low-fat products → 64.6% revenue
+* Medium outlets → highest sales
+* Tier 3 cities → top market
+* Supermarket Type1 → 65% revenue
 
 ---
 
 ## 👤 Author
 
-**Suman Jhanp**  
+**Suman Jhanp**
 Aspiring Data Analyst
 
 ---
 
-## 📌 Project Status
+## 📌 Status
 
-- Status: Completed  
-- Tool: Microsoft Excel  
-- Records: 8,523  
+✔ Completed
+✔ Portfolio Ready
+✔ Live Deployed
 
-> Portfolio Ready · Beginner Friendly · Real Dataset
+---
+
+⭐ If you like this project, give it a star!
